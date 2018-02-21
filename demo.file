@@ -1,0 +1,6 @@
+conf t
+router bgp 65513
+no  network 172.18.9.3/32 route-map DISC
+exit
+exit
+wr mem

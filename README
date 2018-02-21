@@ -1,0 +1,4 @@
+11.10.2013
+
+make quagga accept a file with commands instead of passing multiple -c or \n
+no more than 254 bytes will be read from a command (line) -> need more increase buffer

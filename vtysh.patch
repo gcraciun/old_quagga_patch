@@ -1,0 +1,86 @@
+--- quagga-0.99.20/vtysh/vtysh_main.c	2013-10-11 17:45:49.059636079 +0300
++++ quagga-0.99.20/vtysh/vtysh_main.c-orig	2013-10-11 00:58:26.716788151 +0300
+@@ -143,8 +143,7 @@
+ 	    "-d, --daemon             Connect only to the specified daemon\n" \
+ 	    "-E, --echo               Echo prompt and command in -c mode\n" \
+ 	    "-C, --dryrun             Check configuration for validity and exit\n" \
+-	    "-h, --help               Display this help and exit\n" \
+-	    "-f, --file               Execute commands from file\n\n"
++	    "-h, --help               Display this help and exit\n\n" \
+ 	    "Note that multiple commands may be executed from the command\n" \
+ 	    "line by passing multiple -c args, or by embedding linefeed\n" \
+ 	    "characters in one or more of the commands.\n\n" \
+@@ -165,7 +164,6 @@
+   { "dryrun",		    no_argument,	     NULL, 'C'},
+   { "help",                 no_argument,             NULL, 'h'},
+   { "noerror",		    no_argument,	     NULL, 'n'},
+-  { "file",		    required_argument,	     NULL, 'f'},
+   { 0 }
+ };
+ 
+@@ -228,7 +226,6 @@
+   struct cmd_rec *tail = NULL;
+   int echo_command = 0;
+   int no_error = 0;
+-  char *list_path = NULL;
+ 
+   /* Preserve name of myself. */
+   progname = ((p = strrchr (argv[0], '/')) ? ++p : argv[0]);
+@@ -240,7 +237,7 @@
+   /* Option handling. */
+   while (1) 
+     {
+-      opt = getopt_long (argc, argv, "be:c:d:nEhCf:", longopts, 0);
++      opt = getopt_long (argc, argv, "be:c:d:nEhC", longopts, 0);
+     
+       if (opt == EOF)
+ 	break;
+@@ -266,11 +263,6 @@
+ 	    tail = cr;
+ 	  }
+ 	  break;
+-	case 'f':
+-	  {
+-	    list_path = optarg;
+-	  }
+-	  break;
+ 	case 'd':
+ 	  daemon_name = optarg;
+ 	  break;
+@@ -329,35 +321,7 @@
+       fprintf(stderr, "Exiting: failed to connect to any daemons.\n");
+       exit(1);
+     }
+-  if (list_path)
+-   {
+-     /* Enter into enable node. */
+-     vtysh_execute ("enable");
+-
+-     FILE *lista;
+-     char linie[255], *eol;
+-     int ret;
+-
+-     if ((lista = fopen(list_path, "r")) == NULL)
+-         exit(1);
+-
+-     while (fgets(linie, 254, lista) != NULL) {
+-       if ((eol = strchr(linie, '\n')) != NULL)
+-         *eol = '\0';
+-
+-      if (logfile)
+-        log_it(cmd->line);
+-                      
+-       ret = vtysh_execute_no_pager(linie);
+-       if (!no_error &&
+-         ! (ret == CMD_SUCCESS ||
+-           ret == CMD_SUCCESS_DAEMON ||
+-           ret == CMD_WARNING))
+-       exit(1);
+-     }
+-     fclose(lista);
+-     exit(0);
+-   }
++
+   /* If eval mode. */
+   if (cmd)
+     {
